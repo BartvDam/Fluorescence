@@ -83,12 +83,13 @@ def fit_exponential_decay(t: np.ndarray,
     n = len(decay) # number of data points
     p = len(initial_guess) # number of fitting parameters
 
-    if fitting_method == 'MLE':
-        chi2 = 2*np.sum(I_fit - decay * np.log(I_fit) + np.log(factorial(decay))) # equation 7 Bajzer 1991
-    elif fitting_method == 'LS':
-        chi2 = np.sum((I_res**2)/I_fit) # equation 9 Bajzer 1991. alternatively you could also divide by I_data but you have to deal with the Infs
-    weighted_chi2 = chi2 / (n-p)
-    
+    # if fitting_method == 'MLE':
+    #     chi2 = 2*np.sum(I_fit - decay * np.log(I_fit)) #+ np.log(factorial(decay))) # equation 7 Bajzer 1991
+    # elif fitting_method == 'LS':
+    #     chi2 = np.sum((I_res**2)/I_fit) # equation 9 Bajzer 1991. alternatively you could also divide by I_data but you have to deal with the Infs
+    # weighted_chi2 = chi2 / (n-p)
+    # print(weighted_chi2)
+
     return fit,I_fit
          
 
@@ -100,14 +101,14 @@ def fit_exponential_decay(t: np.ndarray,
 #%%
 t = np.linspace(0,500,200)
 irf = t*0
-irf[15:16] = 1
+irf[15:17] = 1
 irf = irf / np.sum(irf)
 decay_parameters = [500,0.02,20]
-t_shift = 5
+t_shift = 2
 exp = convoluted_exponential_decay(decay_parameters,t,irf,t_shift)
 exp = np.random.poisson(exp)
 #%%
-initial_guess = [100,0.3,20]
+initial_guess = [100,0.6,20]
 t_shift_range = [2,7]
 initial_fit = convoluted_exponential_decay(initial_guess,t,irf,t_shift)
 
