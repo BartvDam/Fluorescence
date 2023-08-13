@@ -91,10 +91,61 @@ def fit_exponential_decay(t: np.ndarray,
     # print(weighted_chi2)
 
     return fit,I_fit
-         
 
+def phasor_approach(t: np.ndarray,
+                    decay: np.ndarray,
+                    ref_decay: np.ndarray,
+                    ref_lifetime: float,
+                    laser_freq: float = []):
+     # units: nanoseconds. e.g. ref_life_time = 5e-9. 0e-9 for irf
 
+     dt = t[1] - t[0] # time step
+     bgr = np.mean(decay[-10:-1]) # background intensity calculated from tail
+     ref_bgr = np.mean(ref_decay[-10:-1])
 
+     decay = decay - bgr # subtract background intensity
+     ref_decay = ref_decay - ref_bgr
+
+     i_max = np.where(ref_decay == np.max(ref_decay))[0][0] # determine t=0 from max of reference decay
+     print(t[i_max])
+     t -= t[i_max]
+
+     # angular frequency
+     if laser_freq:
+         freq = 2 * np.pi * laser_freq
+     else:
+         t_tot = np.max(t) - np.min(t)
+         freq = 2 * np.pi / t_tot
+    
+    # cosine and sine terms
+     cos_term = lambda decay_data : (decay_data * np.cos(freq * t) * dt) / np.sum(decay_data * dt)
+
+     sin_term = lambda decay_data : (decay_data * np.sin(freq * t) * dt) / np.sum(decay_data * dt)
+
+    # calculate phasors
+     u = cos_term(decay)
+     v = sin_term(decay)
+
+     ref_u = cos_term(ref_decay)
+     ref_v = sin_term(ref_decay)
+
+    # correction factor from reference decay
+
+     ref_m = (1+(freq * ref_lifetime)**2)**(-1/2)
+     ref_ph = np.arctan(freq * ref_lifetime)
+
+     cor_m = np.sqrt(ref_u**2 + ref_v**2) / ref_m
+     cor_ph = -1 * np.arctan2(ref_v,ref_u) + ref_ph
+
+    # correct phasor
+     correct_u = lambda u : (u * np.cos(cor_ph) - v * np.sin(cor_ph)) / cor_m
+     correct_v = lambda v : (u * np.sin(cor_ph) + v * np.cos(cor_ph)) / cor_m
+
+     ref_u_cor = correct_u(ref_u)
+     ref_v_cor = correct_v(ref_v)
+
+     u_cor = correct_u(u)
+     v_cor = correct_v(v)
 
 
 
