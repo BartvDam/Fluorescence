@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 from scipy.special import factorial
 
+
 # %%
 
 def convoluted_exponential_decay(decay_parameters: list,
@@ -274,3 +275,7 @@ phasor_plot([phasor[2]],[phasor[3]],phasor[-1],ref_decay_rates*1e9,labels=(1/ref
 # select the proper optimizer function. e.g. trust-constr with 2 point or 3 points. something that outputs the hessian
 # find proper way to find hessian and estimate errors in fitted parameters
 # check if with contraint, the time shift can be fitted too. 
+
+
+
+# %%
